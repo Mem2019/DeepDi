@@ -78,11 +78,11 @@ def _get_pe_code(path):
         pe.close()
 
 
-def example(key, gpu, path):
+def example(key, gpu, path, fd):
     deepdi = DeepDi(key, gpu, 1024 * 1024)
     for inst_addr, func_addr in deepdi.disassemble(path):
         s = np.array2string(
-            func_addr,
+            inst_addr,
             np.inf,
             separator='\n',
             prefix='',
@@ -90,7 +90,7 @@ def example(key, gpu, path):
             formatter={'int': hex},
             threshold=np.inf
         )
-        print(s[1:-1])
+        print(s[1:-1], file=fd)
 
 
 def main():
@@ -98,8 +98,10 @@ def main():
     parser.add_argument('--key', help='DeepDi key', required=True)
     parser.add_argument('--gpu', action='store_true', help='Enable GPU acceleration')
     parser.add_argument('--path', help='Path to the binary to disassemble', required=True)
+    parser.add_argument('--out', help='Path to the output', required=True)
     args = parser.parse_args()
-    example(args.key, args.gpu, args.path)
+    with open(args.out, "w") as fd:
+        example(args.key, args.gpu, args.path, fd)
 
 
 if __name__ == '__main__':
